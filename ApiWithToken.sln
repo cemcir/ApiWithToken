@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.960
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApıWithToken", "ApıWithToken\ApıWithToken.csproj", "{EF8DC74C-A58F-4479-807E-E8AF73E180CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiWithToken", "ApıWithToken\ApiWithToken.csproj", "{EF8DC74C-A58F-4479-807E-E8AF73E180CF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpaWebApplication", "SpaWebApplication\SpaWebApplication.csproj", "{3EC5362D-FC61-449B-922B-D722FA9E2463}"
 EndProject
