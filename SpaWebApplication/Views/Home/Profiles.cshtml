@@ -1,0 +1,106 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+    </script>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+
+    <script src="~/js/Ajax-Jquery/Login/login.js"></script>
+    <script src="~/js/Token/token.js"></script>
+    <title>Profiles</title>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            tokenTest();
+            getData();
+        });
+        function getData() {
+            let url = "http://localhost:58760/api/user";
+            let accesstoken = localStorage.getItem("token");
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                async: false,
+                crossDomain: true,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                success: function (data) {
+                    const html = `
+                                  <div class="container">
+                                        <div class="row">
+                                                                                                                                    <h2>Profiliniz</h2>
+                                          <hr />
+                                    </div>
+                                    <div class="row">
+                                    <div class="col-md-2">
+                                    <img src="/images/userboy.jpg" class="img-circle" with="128" height="128" />
+                                    </div>
+
+                                     <div class="col-md-8">
+                                     <h3>${data.name}  ${data.surName}</h3>
+                                     <br />
+                                     <h6><b>Username:</b>${data.id}</h6>
+                                     <h6><b>Email:</b>${data.email}</h6>
+                                     <br />
+                                     <h6><a href="#">More... </a></h6>
+                                     </div>
+
+                                     <div class="col-md-2 text-right">
+                                     <div class="btn-group">
+                                     <a class="btn dropdown-toggle btn-info" data-toggle="dropdown" href="#">
+                                     <span class="glyphicon glyphicon-cog">&nbsp;</span>İşlemler
+                                     <span class="icon-cog icon-white"></span><span class="caret"></span>
+                                      </a>
+                                      <ul class="dropdown-menu">
+                                      <li>
+                                      <a href="">
+                                      <span class="glyphicon glyphicon-edit">&nbsp;
+                                      </span>Düzenle
+                                      </a>
+                                      </li>
+                                      <li>
+                                      <a href="" onclick="return confirm('Hesabınızı silmek istediğinize emin misiniz?');">Sil</a>
+                                      </li>
+                                      </ul>
+                                      </div>
+                                      </div>
+                                      </div>
+                                      </div>`;
+                    // document.body.innerHTML = html;
+                    $("#userDiv").html(html);
+                },
+                error: function (error) {
+                    console.log(error);
+                    if (error.status == 401) {
+                        getUserDataRefreshToken();
+                    }
+                    else {
+                        window.location = "/Home/Login";
+                    }
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        };
+    </script>
+
+</head>
+<body>
+    <div id="userDiv">
+
+    </div>
+</body>
+</html>

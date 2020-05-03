@@ -1,0 +1,1 @@
+﻿ Scaffold-DbContext "Data Source=ASUS\SQLEXPRESS03;Initial Catalog=ApiWithTokenDB;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Domain 

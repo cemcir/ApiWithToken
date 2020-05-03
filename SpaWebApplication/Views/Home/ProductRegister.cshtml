@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewData["Title"] = "ProductRegister";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<script src="~/js/Ajax-Jquery/Login/login.js"></script>
+<script src="~/js/Token/token.js"></script>
+<script src="~/js/Ajax-Jquery/User/user.js"></script>
+<script src="~/js/Menu/navbarmenu.js"></script>
+<script src="~/js/Form/ProductForm/productform.js"></script>
+<script src="~/js/Ajax-Jquery/Product/product.js"></script>
+<script src="~/js/FrontEndDataControl/productdatacontrol.js"></script>
+
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            tokenTest();
+           // productRegisterForm();
+            getProductRegister();
+        });
+    </script>
+}
+
+<div id="navbarMenuProductRegister"></div>
+<!--
+<div>
+    <br /><br /><br />
+    <form>
+        <div class="form-group">
+            <label for="exampleInputEmail1">Ürün Adı</label>
+            <input type="text" class="form-control" id="Name" aria-describedby="emailHelp">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Kategori</label>
+            <input type="text" class="form-control" id="Category">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Fiyat</label>
+            <input type="number" class="form-control" id="Price">
+        </div>
+        <button type="button" onclick="" class="btn btn-primary">Kaydet</button>
+    </form>
+</div>
+-->
+<div id="productRegisterForm"></div>
+<div class="text-success" id="productRegisterMessage"></div>
+<div class="text-danger" id="productRegisterErrorMessage"></div>

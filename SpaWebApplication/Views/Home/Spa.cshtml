@@ -1,0 +1,237 @@
+﻿
+@{
+    ViewData["Title"] = "Spa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            getUserData();
+
+            showProduct();
+
+            function showProduct() {
+                let url = "http://localhost:58760/api/product";
+                let accesstoken = localStorage.getItem("token");
+
+                $.ajax({
+                    type: "GET",
+                    crossDomain: true,
+                    url: url,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization","Bearer " + accesstoken);
+                    },
+                    success: function (products) {
+                        
+                        var table = `<table class="table table-bordered">
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>İsim</th>
+                                            <th>Fiyat</th>
+                                            <th>Kategori</th>
+                                        </tr>`;
+                        $.each(products, (key, val) => {
+                            table += `<tr>
+                                        <td>${val.id}</td>
+                                        <td>${val.name}</td>
+                                        <td>${val.price}</td>
+                                        <td>${val.category}</td>    
+                                      </tr>`
+                        })
+                        table += "</table>"; 
+
+                        $("#productDiv").html(table);
+                        
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        $("#productDiv").html("ürünler getirilemedi giriş yapınız");
+                    },
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+            };
+
+            $("#btnSave").click(function () {
+                let name = $("#Name").val();
+                let surname = $("#SurName").val();
+                let Email = $("#Email").val();
+                let Password = $("#Password").val();
+
+                let user = { "Name": name, "SurName": surname, "Email": Email, "Password": Password };
+                var url = "http://localhost:58760/api/user";
+
+                $.ajax({
+                    type: "POST",
+                    crossDomain: true,
+                    url: url,
+                    data: JSON.stringify(user),
+                    success: function (data) {
+                        console.table(data);
+                    },
+                    error: function (error) { console.error(error); },
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+            });
+
+            function getUserDataRefreshToken() {
+                let refreshToken = localStorage.getItem("refreshToken");
+
+                var url = "http://localhost:58760/api/login/refreshtoken";
+
+                var data = { "RefreshToken": refreshToken };
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    async: false,
+                    crossDomain: true,
+                    data: JSON.stringify(data),
+                    success: function (data) {
+                        console.log(data);
+                        localStorage.setItem("token", data.token);
+                        localStorage.setItem("refreshToken", data.refreshToken);
+                        getUserData();
+                    },
+                    error: function (error) {
+
+                        if ("refreshtoken bulunamadı" == error.responseText || "refreshtoken suresi dolmus" == error.responseText) {
+                            $("#loginDiv").show();
+                            $("#userDiv").hide();
+                        }
+                        console.log(error.responseText);
+                    },
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+            }
+
+            function getUserData() {
+
+                let url = "http://localhost:58760/api/user";
+                let accesstoken = localStorage.getItem("token");
+
+                $.ajax({
+                    type: "GET",
+                    url: url,
+                    async: false,
+                    crossDomain: true,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                    },
+                    statusCode: {
+                        401: function () {
+                            getUserDataRefreshToken();
+                        }
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        $("#loginDiv").hide();
+
+                        $("#userDiv").show().html("").append(`
+                        <table class='table'>
+                            <tr>
+                                <th>Id</th> 
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                            </tr>
+                            <tr>
+                                <td>${data.id}</td>
+                                <td>${data.name}</td>
+                                <td>${data.surName}</td>
+                                <td>${data.email}</td>
+                            </tr>
+                         </table>`);
+
+
+                    },
+                    error: function (error) { },
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+            };
+
+            $("#btnLogin").click(function () {
+                let Email = $("#LoginEmail").val();
+                let Password = $("#LoginPassword").val();
+
+                let user = { "Email": Email, "Password": Password };
+
+                let url = "http://localhost:58760/api/login/accesstoken";
+
+                $.ajax({
+                    type: "POST",
+                    crossDomain: true,
+                    url: url,
+                    data: JSON.stringify(user),
+                    success: function (data) {
+                        console.table(data);
+                        //sessionStorage.setItem("token", data.token);
+                        //sessionStorage.setItem("refreshToken", data.refreshToken);
+                        localStorage.setItem("token", data.token);
+                        localStorage.setItem("refreshToken", data.refreshToken);
+                        getUserData();
+                        document.getElementById("errormessage").innerHTML = "";
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        console.log("error message");
+                        document.getElementById("errormessage").innerHTML = "Kullanıcı veya şifre yanlış";
+                    },
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+            });
+        });
+    </script>
+}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Üye Kayıt Formu</h2>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="Name" placeholder="İsminiz" />
+                </div>
+                <div class="form-group">
+                    <input type="text" class="form-control" id="SurName" placeholder="Soy isminiz" />
+                </div>
+                <div class="form-group">
+                    <input type="email" class="form-control" id="Email" placeholder="E-posta adresiniz" />
+                </div>
+                <div class="form-group">
+                    <input type="password" class="form-control" id="Password" placeholder="Şifreniz" />
+                </div>
+
+                <button type="button" id="btnSave" class="btn btn-primary">Kaydet</button>
+            </div>
+            <div class="col-md-6">
+                <div id="userDiv">
+
+                </div>
+
+                <div id="loginDiv" style="display:none">
+                    <h2>Üye Giriş Formu</h2>
+                    <form>
+                        <div class="form-group">
+                            <input type="email" class="form-control" id="LoginEmail"        placeholder="email adresiniz" />
+                        </div>
+                        <div class="form-group">
+                            <input type="password" class="form-control"             id="LoginPassword" placeholder="şifreniz"/>
+                        </div>
+                        <button type="button" class="btn btn-success" id="btnLogin">Giriş</button>
+                        <br/><br/>
+                        <span class="text-danger" id="errormessage"></span>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="text-danger" id="productDiv"></div>
+        </div>
+    </div>
+
+

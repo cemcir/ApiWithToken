@@ -1,0 +1,424 @@
+﻿@using SpaWebApplication.ViewModels
+@model ErrorViewModels
+
+@{
+    ViewData["Title"] = "Users";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<link href="~/lib/bootstrap/dist/css/messagebox.css" rel="stylesheet" />
+<script src="~/js/menu.js"></script>
+<script src="~/js/pageredirect.js"></script>
+<script src="~/js/Form/ProductRegisterForm/productregister.js"></script>
+@section Scripts{ 
+<script type="text/javascript">
+    var value = true;
+    $(document).ready(function () {
+        
+        getUserData();
+
+        redirectToProductRegister();
+
+        showProduct();
+
+        function redirectToProductRegister() {
+            $("#addProductLink").click(function () {
+                window.location = "/Home/ProductRegister";
+            });
+        };
+        
+        function showProduct() {
+            $("#link").click(function () { 
+            let url = "http://localhost:58760/api/product";
+            let accesstoken = localStorage.getItem("token");
+
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                url: url,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                success: function (products) {
+                    
+                    var table = `
+                                <br/><br/><br/>
+                                <table class="table table-bordered">
+                                        <tr>
+                                            <th>Ürün Adı</th>
+                                            <th>Kategori</th>
+                                            <th>Fiyat</th>
+                                            <th>Güncelle/Sil</th>
+                                        </tr>`;
+                    $.each(products, (key, val) => {
+                        table += `<tr>
+                                        <td>${val.name}</td>
+                                        <td>${val.category}</td> 
+                                        <td>${val.price}</td>
+                                        <td>
+                                            <button class="btn btn-primary" id="btnUpdate" value="${val.id}" onclick="productFormPage(this.value)">Güncelle
+                                            </button>/
+                                            <button type="button" class="btn btn-warning" id="btnDelete" value="${val.id}" onclick="productDelete(this.value)">Sil
+                                            </button>
+                                        </td>    
+                                  </tr>`
+                    });
+                    
+                    table += "</table>";
+
+                    $("#productDiv").html(table);
+
+                },
+                error: function (error) {
+                    console.log(error);
+                    $("#productDiv").html("ürünler getirilemedi giriş yapınız");
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        });
+        };
+        
+        $("#btnLogOut").click(function () {
+
+            let refreshToken = localStorage.getItem("refreshToken");
+
+            var url = "http://localhost:58760/api/login/revokerefreshtoken";
+
+            var data = { "RefreshToken": refreshToken };
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                crossDomain: true,
+                data: JSON.stringify(data),
+                success: function (data) {
+                    console.log(data);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("refreshToken", data.refreshToken);
+                    window.location = "/Home/Login";
+                },
+                error: function (error) {
+
+                    if ("refreshtoken bulunamadı" == error.responseText) {
+
+                    }
+                    console.log(error.responseText);
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+
+
+        });
+
+        function getUserDataRefreshToken() {
+            let refreshToken = localStorage.getItem("refreshToken");
+
+            var url = "http://localhost:58760/api/login/refreshtoken";
+
+            var data = { "RefreshToken": refreshToken };
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                async: false,
+                crossDomain: true,
+                data: JSON.stringify(data),
+                success: function (data) {
+                    console.log(data);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("refreshToken", data.refreshToken);
+                   // $("#userDiv").hide();
+                    getUserData();
+                },
+                error: function (error) {
+
+                    if ("refreshtoken bulunamadı" == error.responseText || "refreshtoken suresi dolmus" == error.responseText) {
+                       
+                         const html = `
+                        <div class="container">
+                            <div class="row vertical-offset-100">
+                                <div class="col-md-4 col-md-offset-4">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h1 class="panel-title">@Model.Header</h1>
+                                        </div>
+                                    <div class="panel-body">
+                                        <form accept-charset="UTF-8" role="form">
+                                            <fieldset>
+                                                <div class="form-group text-danger">
+                                                    <h2><span class="glyphicon glyphicon-remove-circle"></span>&nbsp;&nbsp;&nbsp; @Model.Title</h2>
+                                                </div>
+                                                <div class="form-group">
+                                                <hr />
+                                                <p class="text-justify text-info">
+                                                    İzin Verilmeyen Yöntem Lütfen Sisteme                               Giriş Yapınız
+                                                </p>
+                                                </div>
+                                            </fieldset>
+                                        </form>
+                                    </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                        document.body.innerHTML = html;
+
+                        redirect(@Model.RedirectingTimeout, "@Model.RedirectingUrl");
+        
+                }
+                    console.log(error.responseText);
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        }
+
+        function getUserData() {
+
+            let url = "http://localhost:58760/api/user";
+            let accesstoken = localStorage.getItem("token");
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                async: false,
+                crossDomain: true,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                /*
+                statusCode: {
+                    401: function () {
+                        getUserDataRefreshToken();
+                    }
+                },
+                */
+                success: function (data) {
+                    navbarMenu(data);
+                    /*
+                    <table class='table'>
+                        <tr>
+                            <th>Id</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Email</th>
+                        </tr>
+                        <tr>
+                            <td>${data.id}</td>
+                            <td>${data.name}</td>
+                            <td>${data.surName}</td>
+                            <td>${data.email}</td>
+                        </tr>
+                    </table>
+                    */
+                },
+                error: function (error) {
+                    console.log(error);
+                    if (error.status == 401) {
+                        getUserDataRefreshToken();
+                    }
+                    else {
+                        const html = `
+    <div class="container">
+        <div class="row vertical-offset-100">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1 class="panel-title">@Model.Header</h1>
+                    </div>
+                    <div class="panel-body">
+                        <form accept-charset="UTF-8" role="form">
+                            <fieldset>
+                                <div class="form-group text-danger">
+                                    <h2><span class="glyphicon glyphicon-remove-circle"></span>&nbsp;&nbsp;&nbsp; @Model.Title</h2>
+                                </div>
+                                <div class="form-group">
+                                    <hr />
+                                    <p class="text-justify text-info">
+                                        İzin Verilmeyen Yöntem Lütfen Sisteme                               Giriş Yapınız
+                                    </p>
+                                </div>
+                            </fieldset>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+                        document.body.innerHTML = html;
+                        
+                        redirect(@Model.RedirectingTimeout, "@Model.RedirectingUrl");
+                    }
+                   // window.location = "/Home/Login";
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        };
+
+    });
+</script>
+}
+<body>
+    <div id="productDivs">
+
+    </div>
+</body>
+<div id="userDiv">
+    <!--
+     <div class="login-box">
+         <div class="login-header">@Model.Header</div>
+         <div class="login-body">
+             <div class="form-group">
+                 <div class="text-danger">
+                     <h2><span class="glyphicon glyphicon-remove-circle"></span>&nbsp;&nbsp;&nbsp; @Model.Title</h2>
+                     <hr />
+                     <p class="text-justify text-info">
+                         İzin Verilmeyen Yöntem Lütfen Sisteme Giriş Yapınız
+                     </p>
+                 </div>
+             </div>
+         </div>
+     </div>
+     -->
+
+
+    <script>
+        function getButtonValue(value) {
+            return value;
+        };
+
+        function showProduct() {
+
+                let url = "http://localhost:58760/api/product";
+                let accesstoken = localStorage.getItem("token");
+
+                $.ajax({
+                    type: "GET",
+                    crossDomain: true,
+                    url: url,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                    },
+                    success: function (products) {
+
+                        var table = `
+                                <br/><br/><br/>
+                                <table class="table table-bordered">
+                                        <tr>
+                                            <th>Ürün Adı</th>
+                                            <th>Kategori</th>
+                                            <th>Fiyat</th>
+                                            <th>Güncelle/Sil</th>
+                                        </tr>`;
+                        $.each(products, (key, val) => {
+                            table += `<tr>
+                                        <td>${val.name}</td>
+                                        <td>${val.category}</td>
+                                        <td>${val.price}</td>
+                                        <td>
+                                            <button class="btn btn-primary" id="btnUpdate" value="${val.id}" onclick="getButtonValue(this.value)">Güncelle
+                                            </button>/
+                                            <button type="button" class="btn btn-warning" value="${val.id}" onclick="productDelete(this.value)">Sil</button>
+                                        </td>
+                                  </tr>`
+                        })
+                        table += "</table>";
+
+                        $("#productDiv").html(table);
+
+                    },
+                    error: function (error) {
+                        console.log(error);
+                        $("#productDiv").html("ürünler getirilemedi giriş yapınız");
+                    },
+                    contentType: "application/json",
+                    dataType: "json"
+                });
+
+        };
+
+        function productDelete(value) {
+            var values = value;
+            let url = "http://localhost:58760/api/product/" + value;
+            let accesstoken = localStorage.getItem("token");
+
+            $.ajax({
+                type: "DELETE",
+                url: url,
+                crossDomain: true,
+                dataType: "json",
+                async: false,
+                contentType: "application/json",
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                success: function (data) {
+                    showProduct();
+                },
+                error: function (error) {
+
+                },
+            });
+        }
+
+        function productFormPage(id) {
+
+            let url = "http://localhost:58760/api/product/" + id;
+            let accesstoken = localStorage.getItem("token");
+
+            $.ajax({
+                type: "GET",
+                crossDomain: true,
+                url: url,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                success: function (products) {
+                    productRegisterForm(products.id, products.name, products.category, products.price);
+                    
+                },
+                error: function (error) {
+
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        };
+
+        function updateProduct(value) {
+
+            let name = $("#Name").val();
+            let price = $("#Price").val();
+            let category = $("#Category").val();
+
+            let url = "http://localhost:58760/api/product/" + value;
+            let accesstoken = localStorage.getItem("token");
+            let product = { "Name": name, "Price": price, "Category": category };
+            $.ajax({
+                type: "PUT",
+                url: url,
+                crossDomain: true,
+                dataType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(product),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                success: function (products) {
+                    window.alert("ürün güncellendi");
+                },
+                error: function (error) {
+
+                },
+            });
+        };
+
+
+    </script>
+
+    </div>

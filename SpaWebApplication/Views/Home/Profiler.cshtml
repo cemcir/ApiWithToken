@@ -1,0 +1,41 @@
+﻿
+@{
+    ViewData["Title"] = "Profiler";
+    Layout = "~/Views/Shared/_layout1.cshtml";
+}
+
+<script src="~/js/Ajax-Jquery/Login/login.js"></script>
+<script src="~/js/Token/token.js"></script>
+<script src="~/js/Ajax-Jquery/User/user.js"></script>
+<script src="~/js/Menu/navbarmenu.js"></script>
+<script src="~/js/Form/UserForm/userform.js"></script>
+<script src="~/js/FrontEndDataControl/userdatacontrol.js"></script>
+
+@section Scripts{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            tokenTest();
+            getUserData();
+        });
+        function cancelProfileUpdateOperation() {
+            $("#userProfileDiv").show();
+            $("#userUpdateProfileDiv").hide();
+            document.getElementById("message").innerHTML = "";
+            document.getElementById("errormessage").innerHTML = "";
+        };
+    </script>
+}
+
+<div id="navbarMenuProfile">
+
+</div>
+<div id="userProfileDiv">
+
+</div>
+<div id="userUpdateProfileDiv">
+
+</div>
+<div span class="text-success" id="message"></div>
+<div class="text-danger" id="user_errormessage"></div>
+<div class="text-danger" id="errormessage"></div>

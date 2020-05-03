@@ -1,0 +1,204 @@
+﻿
+@{
+    ViewData["Title"] = "Member";
+}
+<script src="~/js/FrontEndDataControl/userdatacontrol.js"></script>
+@section Scripts{
+
+    <script type="text/javascript">
+        $("#footerTag").hide();
+        /*
+        function validateName() {
+            let regex = /^[a-zA-ZğüşıöçĞÜŞİÖÇ]{3,}$/;
+            let regex1 = /^\(?([a-zA-ZğüşıöçĞÜŞİÖÇ]{3,})\)?[ ]?([a-zA-ZğüşıöçĞÜŞİÖÇ]{3,})$/;
+            let name = document.getElementById("Name").value;
+            let result1 = name.match(regex);
+            let result2 = name.match(regex1);
+            document.getElementById("name_errormessage").innerHTML = "";
+            //window.alert(result);
+            if (name =="") {
+                document.getElementById("name_errormessage").innerHTML = "isim alanı boş bırakılamaz";
+            }
+            else if (name.charAt(0) == " ") {
+                document.getElementById("name_errormessage").innerHTML = "ismin ilk karakteri boş olamaz";
+                //return;
+            }
+            else if (result1 == null) {
+                if (result2 == null) {
+                    document.getElementById("name_errormessage").innerHTML = "isim arasında bir karakter boşluk bırakınız";
+                    //return;
+                }
+            }
+        };
+        
+        
+        function validateSurName(){
+	        let regex=/^[a-zA-ZğüşıöçĞÜŞİÖÇ]{2,}$/;
+			let surName=document.getElementById("SurName").value;
+			let result=surName.match(regex);
+            document.getElementById("surname_errormessage").innerHTML = "";
+            if (surName == "") {
+                document.getElementById("surname_errormessage").innerHTML = "soyisim alanı boş bırakılamaz";
+            }
+			else if (surName.charAt(0) == " ") {
+			    document.getElementById("surname_errormessage").innerHTML = "soyisimin ilk karakteri boş olamaz";
+			    return;
+			}
+			else if (result == null) {
+			    document.getElementById("surname_errormessage").innerHTML = "yanlış giriş";
+				return;
+			}
+        };
+        */
+        /*
+        function validateEmail() {
+            let regex = /^([a-zA-Z0-9_\.\-])/;
+            //let regex1 = /(hotmail.com|gmail.com|outlook.com)/g;
+
+            let email = document.getElementById("Email").value;
+
+		    //let result = email.match(regex);
+			document.getElementById("message").innerHTML="";
+            document.getElementById("email_errormessage").innerHTML = "";
+            if (email == "") {
+                document.getElementById("email_errormessage").innerHTML = "e-posta alanı boş bırakılamaz";
+            }
+            else if (email.charAt(0) == '') {
+                document.getElementById("email_errormessage").innerHTML = "ilk karakter boş olamaz";
+			}		
+			else{
+		        document.getElementById("email_errormessage").innerHTML="yanlış giriş";
+			}
+        };
+        */
+        
+        /*
+        function validatePassword(){		
+	        var password = document.getElementById("Password").value;
+			var patt1 = /^[0-9]{3}$/;
+			var pattern=/^[a-zA-Z0-9]{1}$/;
+			var pattern1=/[a-z]/g;
+			var pattern2=/[A-Z]/g;
+			var pattern3=/[0-9]/g;
+			var pattern4=/[+*-_.\?]/g;
+			var regex= /^\(?([+*-_.\?a-zA-Z0-9]{1})\)?[\s]?([+*-_.\?a-zA-Z0-9]{1})?[\s]?([+*-_.\?a-zA-Z0-9]{1})?[\s]?([+*-_.\?a-zA-Z0-9]{1})?[\s]?([+*-_.\?a-zA-Z0-9]{4})$/;
+			var result =password.match(patt1);
+			var result1=password.match(regex);
+			var result2=password.match(pattern1);
+            document.getElementById("password_errormessage").innerHTML = "";
+
+            if (password == "") {
+                document.getElementById("password_errormessage").innerHTML = "şifre alanı boş bırakılamaz";
+            }
+			else if(password.match(pattern4)==null){
+                document.getElementById("password_errormessage").innerHTML = "şifrede en az bir tane özel karakter bulunmalıdır";
+                //return;
+            }
+            else if (password.length != 8) {
+				document.getElementById("password_errormessage").innerHTML="şifre 8 karakter olmalıdır";
+				//return;
+			}
+				
+		    else if(password.match(pattern1)==null){
+				document.getElementById("password_errormessage").innerHTML="şifrede en az bir tane küçük harf bulunmalıdır";
+				//return;
+			}
+			else if(password.match(pattern2)==null){
+				document.getElementById("password_errormessage").innerHTML="şifrede en az bir tane büyük harf bulunmalıdır";
+				//return;
+			}
+            else if (password.match(pattern3) == null) {
+                document.getElementById("password_errormessage").innerHTML = "şifrede en az bir tane rakam bulunmalıdır";
+                //return;
+            }
+		};
+        */
+        $("#btnSave").click(function () {
+            let name = $("#Name").val();
+            let surname = $("#SurName").val();
+            let Email = $("#Email").val();
+            let Password = $("#Password").val();
+
+            let user = { "Name": name, "SurName": surname, "Email": Email, "Password": Password };
+            var url = "http://localhost:58760/api/user";
+
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                url: url,
+                data: JSON.stringify(user),
+                success: function (data) {
+                    console.table(data);
+                    document.getElementById("errormessage").innerHTML = "";
+                    document.getElementById("user_errormessage").innerHTML = "";
+                    window.location = "/home/login";
+                    //document.getElementById("message").innerHTML = "kayıt başarılı";
+                },
+                error: function (error) {
+                    console.error(error);
+                    validateName();
+                    validateSurName();
+                    validateEmail();
+                    validatePassword();
+                    document.getElementById("user_errormessage").innerHTML = "";
+                    //document.getElementById("errormessage").innerHTML = "";
+                    if (error.responseText == "kullanıcı mevcut") {
+                        document.getElementById("email_errormessage").innerHTML = "";
+                        document.getElementById("user_errormessage").innerHTML = "kullanıcı zaten mevcut";
+                    }
+                    document.getElementById("message").innerHTML = "";
+                    //document.getElementById("errormessage").innerHTML = "kayıt başarısız";
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        });
+
+    </script>
+}
+
+    <br /><br /><br/><br /><br/><br/><br/>
+    <div class="container">
+        <div class="row vertical-offset-100">
+            <div class="col-md-4 col-md-offset-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Üye Kayıt Formu</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form accept-charset="UTF-8" role="form">
+                            <fieldset>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="Name" placeholder="İsminiz" />
+                                    <div class="text-danger" id="name_errormessage">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" id="SurName" placeholder="Soy isminiz" />
+                                    <div class="text-danger" id="surname_errormessage">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control" id="Email" placeholder="E-posta adresiniz" />
+                                    <div class="text-danger" id="email_errormessage">
+                                    </div>
+                                </div>
+                                <div>
+                                    <input type="password" class="form-control" id="Password" placeholder="Şifreniz" />
+                                    <div class="text-danger" id="password_errormessage">
+                                    </div>
+                                </div>
+                                <br />
+                                <button type="button" onclick="validateName()" id="btnSave" class="btn btn-primary">Kaydet</button>
+                            </fieldset>
+                        </form>
+                    </div>
+
+                </div>
+                <div span class="text-success" id="message"></div>
+                <div class="text-danger" id="user_errormessage"></div>
+                <div class="text-danger" id="errormessage"></div>
+            </div>
+        </div>
+    </div>
+   

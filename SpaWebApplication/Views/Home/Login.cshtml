@@ -1,0 +1,158 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+}
+<script src=""></script>
+@section Scripts{
+
+    <script type="text/javascript">
+        $("#footerTag").hide();
+
+        function getUserDataRefreshToken() {
+            let refreshToken = localStorage.getItem("refreshToken");
+
+            var url = "http://localhost:58760/api/login/refreshtoken";
+
+            var data = { "RefreshToken": refreshToken };
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                async: false,
+                crossDomain: true,
+                data: JSON.stringify(data),
+                success: function (data) {
+                    console.log(data);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("refreshToken", data.refreshToken);
+                    getUserData();
+                },
+                error: function (error) {
+
+                    if ("refreshtoken bulunamadı" == error.responseText || "refreshtoken suresi dolmus" == error.responseText) {
+                        /*
+                        $("#loginDiv").show();
+                        $("#userDiv").hide();
+                        */
+                        window.location = "/Home/Login";
+                    }
+                    console.log(error.responseText);
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        }
+
+        function getUserData() {
+
+            let url = "http://localhost:58760/api/user";
+            let accesstoken = localStorage.getItem("token");
+
+            $.ajax({
+                type: "GET",
+                url: url,
+                async: false,
+                crossDomain: true,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accesstoken);
+                },
+                statusCode: {
+                    401: function () {
+                        getUserDataRefreshToken();
+                    }
+                },
+                success: function (data) {
+                    console.log(data);
+
+                    window.location = "/Home/Product";
+
+                    /*
+                    $("#loginDiv").hide();
+                    $("#userDiv").show().html("").append(`
+                        <table class='table'>
+                            <tr>
+                                <th>Id</th> 
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
+                            </tr>
+                            <tr>
+                                <td>${data.id}</td>
+                                <td>${data.name}</td>
+                                <td>${data.surName}</td>
+                                <td>${data.email}</td>
+                            </tr>
+                         </table>`);
+                    */
+
+                },
+                error: function (error) { },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        };
+
+        $("#btnLogin").click(function () {
+            let Email = $("#LoginEmail").val();
+            let Password = $("#LoginPassword").val();
+
+            let user = { "Email": Email, "Password": Password };
+
+            let url = "http://localhost:58760/api/login/accesstoken";
+
+            $.ajax({
+                type: "POST",
+                crossDomain: true,
+                url: url,
+                data: JSON.stringify(user),
+                success: function (data) {
+                    //console.table(data);
+                    //sessionStorage.setItem("token", data.token);
+                    //sessionStorage.setItem("refreshToken", data.refreshToken);
+                    localStorage.setItem("token", data.token);
+                    localStorage.setItem("refreshToken", data.refreshToken);
+                    getUserData();
+                    document.getElementById("errormessage").innerHTML = "";
+                },
+                error: function (error) {
+                    console.log(error);
+                    console.log("error message");
+                    document.getElementById("errormessage").innerHTML = "Kullanıcı veya şifre yanlış";
+                },
+                contentType: "application/json",
+                dataType: "json"
+            });
+        });
+
+    </script>
+}
+
+<br /><br /><br /><br /><br /><br /><br />
+<div class="container">
+    <div class="row vertical-offset-100">
+        <div class="col-md-4 col-md-offset-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Üye Giriş Formu</h3>
+                </div>
+                <div class="panel-body">
+                    <form accept-charset="UTF-8" role="form">
+                        <fieldset>
+                            <div class="form-group">
+                                <input type="email" class="form-control" id="LoginEmail" placeholder="email adresiniz" />
+                            </div>
+                            <div class="form-group">
+                                <input type="password" class="form-control" id="LoginPassword" placeholder="şifreniz" />
+                            </div>
+                            <button type="button" class="btn btn-lg btn-success btn-block" id="btnLogin">Giriş</button>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+            <span class="text-danger" id="errormessage"></span>
+        </div>
+    </div>
+</div>
+
+
+
